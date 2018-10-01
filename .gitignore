@@ -1,0 +1,10 @@
+.htaccess
+/.env
+/composer.lock
+/vendor/
+/storage/profiler/caches/
+/storage/twig/caches/
+/storage/web/upload/
+/storage/console/*.log
+/storage/console/event/*.log
+prepros-6.config

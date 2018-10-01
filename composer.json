@@ -1,0 +1,30 @@
+{
+  "require": {
+    "php": ">=5.2.0",
+    "silex/silex": "~2.0",
+    "silex/web-profiler": "~2.0",
+    "j4mie/idiorm": "~1.0",
+    "j4mie/paris": "~1.0",
+    "twig/twig": "~2.0",
+    "twig/extensions": "~1.0",
+    "symfony/form": "~3.0",
+    "symfony/translation": "^4.0",
+    "symfony/validator": "~3.0",
+    "symfony/config": "~3.0",
+    "symfony/security-csrf": "~3.0",
+    "symfony/asset": "~3.0",
+    "symfony/twig-bridge": "~3.0",
+    "symfony/yaml": "~3.0",
+    "sabre/event": "dev-master",
+    "robmorgan/phinx": "~0.0",
+    "josegonzalez/dotenv": "dev-master",
+    "knplabs/console-service-provider": "dev-master",
+    "wikimedia/composer-merge-plugin": "dev-master",
+    "wake/silex-mobiledetect-provider": "dev-master",
+    "html2text/html2text": "dev-master",
+    "wake/silex-file-loader": "dev-master",
+    "wake/silex-twig-helper": "dev-master",
+    "wake/pager": "dev-master",
+    "wake/php-array-kit": "dev-master"
+  }
+}
