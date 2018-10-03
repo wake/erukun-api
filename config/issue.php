@@ -43,7 +43,7 @@
     $data['id'] = $issue->id;
     $data['group'] = $team ? $app['teamToLine'] ($team) : null;
     $data['user'] = $user ? $app['userToLine'] ($user) : null;
-    $data['creatorId'] = $creator ? $app['userToLine'] ($creator) : null;
+    $data['creator'] = $creator ? $app['userToLine'] ($creator) : null;
     $data['title'] = $issue->title;
     $data['status'] = $issue->status;
     $data['duedate'] = $issue->duedate;
