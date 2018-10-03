@@ -6,7 +6,7 @@
    * Team type
    *
    */
-  define ('_TEAM_TYPE_LINE',    1);
+  define ('_TEAM_USER_TYPE_LINE',    1);
 
 
   /**
