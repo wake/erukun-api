@@ -10,7 +10,7 @@
 
   /**
    *
-   * Get Line group
+   * Get Line groups
    *
    */
   $app->get ('/line/groups', function (Request $request) use ($app) {
@@ -21,7 +21,26 @@
 
     return $app['json-success'] (200, $app['teamsToLine'] ($teams));
 
-  })->bind ('line/group');
+  })->bind ('line/group/list');
+
+
+  /**
+   *
+   * Get Line group
+   *
+   */
+  $app->get ('/line/group/{gid}', function (Request $request, $gid) use ($app) {
+
+    $team = Model::Factory ('Team')
+      ->where ('line_group_id', $gid)
+      ->find_one ();
+
+    if (! $team)
+      return $app['json-error'] (400, 'Group not exists');
+
+    return $app['json-success'] (200, $app['teamToLine'] ($team));
+
+  })->bind ('line/group/view');
 
 
   /**
@@ -58,7 +77,7 @@
 
     return $app['json-success'] (200, $app['teamToLine'] ($team));
 
-  })->bind ('POST:line/group');
+  })->bind ('line/group/create');
 
 
   /**
@@ -89,4 +108,4 @@
 
     return $app['json-success'] (200, $app['teamToLine'] ($team));
 
-  })->bind ('PUT:line/group');
+  })->bind ('line/group/update');
