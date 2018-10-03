@@ -21,7 +21,26 @@
 
     return $app['json-success'] (200, $app['usersToLine'] ($users));
 
-  })->bind ('line/users');
+  })->bind ('line/user/list');
+
+
+  /**
+   *
+   * Get Line user
+   *
+   */
+  $app->get ('/line/user/{uid}', function (Request $request, $uid) use ($app) {
+
+    $user = Model::Factory ('User')
+      ->where ('line_id', $uid)
+      ->find_one ();
+
+    if (! $user)
+      return $app['json-error'] (400, 'User not exists');
+
+    return $app['json-success'] (200, $app['userToLine'] ($user));
+
+  })->bind ('line/user/view');
 
 
   /**
