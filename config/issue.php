@@ -37,13 +37,13 @@
     $data = [];
 
     $team = $issue->team ()->find_one ();
-    $user = $issue->user ()->find_one ();
-    $creator = $issue->creator ()->find_one ();
+    $assignee = $issue->assignee ()->find_one ();
+    $opener = $issue->opener ()->find_one ();
 
     $data['id'] = $issue->id;
     $data['group'] = $team ? $app['teamToLine'] ($team) : null;
-    $data['user'] = $user ? $app['userToLine'] ($user) : null;
-    $data['creator'] = $creator ? $app['userToLine'] ($creator) : null;
+    $data['assignee'] = $assignee ? $app['userToLine'] ($assignee) : null;
+    $data['opener'] = $opener ? $app['userToLine'] ($opener) : null;
     $data['title'] = $issue->title;
     $data['status'] = $issue->status;
     $data['duedate'] = $issue->duedate;

@@ -109,8 +109,8 @@ class Initial extends AbstractMigration {
 
       // 群組 / 使用者資料
       ->addColumn ('team_id', 'integer', ['limit' => MysqlAdapter::INT_BIG, 'signed' => FALSE, 'comment' => '團隊鍵值'])
-      ->addColumn ('user_id', 'integer', ['limit' => MysqlAdapter::INT_BIG, 'signed' => FALSE, 'null' => TRUE, 'comment' => '被指派者鍵值'])
-      ->addColumn ('creator_id', 'integer', ['limit' => MysqlAdapter::INT_BIG, 'signed' => FALSE, 'comment' => '建立者者鍵值'])
+      ->addColumn ('opener_id', 'integer', ['limit' => MysqlAdapter::INT_BIG, 'signed' => FALSE, 'comment' => '建立者者鍵值'])
+      ->addColumn ('assignee_id', 'integer', ['limit' => MysqlAdapter::INT_BIG, 'signed' => FALSE, 'null' => TRUE, 'comment' => '被指派者鍵值'])
 
       // 標題
       ->addColumn ('title', 'char', ['limit' => 128, 'null' => FALSE, 'comment' => '標題'])
@@ -122,8 +122,8 @@ class Initial extends AbstractMigration {
 
       // Keys
       ->addIndex ('team_id')
-      ->addIndex ('user_id')
-      ->addIndex ('creator_id')
+      ->addIndex ('opener_id')
+      ->addIndex ('assignee_id')
       ->addIndex ('duedate')
 
       // Mutiple combined keys: empty

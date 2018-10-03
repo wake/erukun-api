@@ -81,49 +81,49 @@
     $post = json_decode (file_get_contents ('php://input'), true);
 
     // Invalid userId
-    if (! isset ($post['creatorId']) || $post['creatorId'] == '')
-      return $app['json-error'] (400, 'Invalid creator id');
+    if (! isset ($post['openerId']) || $post['openerId'] == '')
+      return $app['json-error'] (400, 'Invalid opener id');
 
-    // Check if creator exists
-    $creator = Model::Factory ('User')
-      ->where ('line_id', $post['creatorId'])
+    // Check if opener exists
+    $opener = Model::Factory ('User')
+      ->where ('line_id', $post['openerId'])
       ->where_not_null ('line_id')
       ->find_one ();
 
-    if (! $creator)
-      return $app['json-error'] (400, 'Creator not exists');
+    if (! $opener)
+      return $app['json-error'] (400, 'Opener not exists');
 
     // Check if team-user relation exists
     $rel = Model::Factory ('TeamUser')
       ->where ('team_id', $team->id)
-      ->where ('user_id', $creator->id)
+      ->where ('user_id', $opener->id)
       ->find_one ();
 
     if (! $rel)
-      return $app['json-error'] (400, 'Creator not belong to this group');
+      return $app['json-error'] (400, 'Opener not belong to this group');
 
-    $user = null;
+    $assignee = null;
 
     // Has userId
-    if (isset ($post['userId']) && $post['userId'] != '') {
+    if (isset ($post['assigneeId']) && $post['assigneeId'] != '') {
 
       // Check if user exists
-      $user = Model::Factory ('User')
-        ->where ('line_id', $post['userId'])
+      $assignee = Model::Factory ('User')
+        ->where ('line_id', $post['assigneeId'])
         ->where_not_null ('line_id')
         ->find_one ();
 
-      if (! $user)
-        return $app['json-error'] (400, 'User not exists');
+      if (! $assignee)
+        return $app['json-error'] (400, 'Assignee not exists');
 
       // Check if team-user relation exists
       $rel = Model::Factory ('TeamUser')
         ->where ('team_id', $team->id)
-        ->where ('user_id', $user->id)
+        ->where ('user_id', $assignee->id)
         ->find_one ();
 
       if (! $rel)
-        return $app['json-error'] (400, 'User not belong to this group');
+        return $app['json-error'] (400, 'Assignee not belong to this group');
     }
 
     // Issue
@@ -132,10 +132,10 @@
 
     $issue = Model::Factory ('Issue')->create ();
     $issue->team_id = $team->id;
-    $issue->user_id = $user ? $user->id : null;
+    $issue->opener_id = $opener->id;
+    $issue->assignee_id = $assignee ? $assignee->id : null;
     $issue->title   = $post['title'];
     $issue->status  = _ISSUE_STATUS_UNCHECK;
-    $issue->creator_id = $creator->id;
     $issue->duedate = isset ($post['duedate']) ? $post['duedate'] : null;
     $issue->save ();
 
@@ -174,35 +174,40 @@
     // Receive JSON data
     $post = json_decode (file_get_contents ('php://input'), true);
 
-    $user = null;
+    $assignee = null;
 
     // Has userId
-    if (isset ($post['userId']) && $post['userId'] != '') {
+    if (isset ($post['assignId']) && $post['assignId'] != '') {
 
       // Check if user exists
-      $user = Model::Factory ('User')
-        ->where ('line_id', $post['userId'])
+      $assignee = Model::Factory ('User')
+        ->where ('line_id', $post['assignId'])
         ->where_not_null ('line_id')
         ->find_one ();
 
-      if (! $user)
-        return $app['json-error'] (400, 'User not exists');
+      if (! $assignee)
+        return $app['json-error'] (400, 'Assignee not exists');
 
       // Check if team-user relation exists
       $rel = Model::Factory ('TeamUser')
         ->where ('team_id', $team->id)
-        ->where ('user_id', $user->id)
+        ->where ('user_id', $assignee->id)
         ->find_one ();
 
       if (! $rel)
-        return $app['json-error'] (400, 'User not belong to this group');
+        return $app['json-error'] (400, 'Assignee not belong to this group');
+
+      $issue->assignee_id = $assignee->id;
     }
+
+    // Null to remove user
+    else if (is_null ($post['assigneeId']))
+      $issue->assignee_id = null;
 
     // Issue
     if (isset ($post['title']) && $post['title'] == '')
       return $app['json-error'] (400, 'Issue `title` can\'t be empty');
 
-    $issue->user_id = $user ? $user->id : $issue->user_id;
     $issue->title   = isset ($post['title']) ? $post['title'] : $issue->title;
     $issue->status  = (isset ($post['status']) && in_array ($post['status'], [_ISSUE_STATUS_UNCHECK, _ISSUE_STATUS_CHECKED])) ? $post['status'] : $issue->status;
     $issue->duedate = (isset ($post['duedate']) || is_null ($post['duedate'])) ? $post['duedate'] : $issue->duedate;

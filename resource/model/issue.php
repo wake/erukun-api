@@ -15,11 +15,11 @@
       return $this->belongs_to ('Team');
     }
 
-    public function user () {
-      return $this->belongs_to ('User');
+    public function assignee () {
+      return \Model::Factory ('User')->where ('id', $this->assignee_id);
     }
 
-    public function creator () {
-      return \Model::Factory ('User')->where ('id', $this->creator_id);
+    public function opener () {
+      return \Model::Factory ('User')->where ('id', $this->opener_id);
     }
   }
