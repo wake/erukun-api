@@ -40,6 +40,35 @@
 
   /**
    *
+   * Json return shortcut (success)
+   *
+   */
+  $app['json-success'] = $app->protect (function ($state, $context) use ($app) {
+    return $app->json ([
+
+      'state' => [
+        'code' => 1,
+        'message' => ''
+      ],
+
+      'result' => $context
+
+    ], $state, array ('Content-Type' => 'application/json'));
+  });
+
+
+  /**
+   *
+   * Json return shortcut (error)
+   *
+   */
+  $app['json-error'] = $app->protect (function ($state, $message) use ($app) {
+    return $app->json (['code' => -1, 'message' => $message], $state, array ('Content-Type' => 'application/json'));
+  });
+
+
+  /**
+   *
    * Boot Application
    *
    */
