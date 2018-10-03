@@ -1,27 +1,62 @@
 <?php
 
-return [
+  use josegonzalez\Dotenv;
 
-  'paths' => [
-    'migrations' => [
-      '%%PHINX_CONFIG_DIR%%/../database/migrations',
-    ],
-    'seeds' => [
-      '%%PHINX_CONFIG_DIR%%/../database/seeds',
-    ],
-  ],
+  if (! defined ('_ROOT')) {
 
-  'environments' => [
-    'default_migration_table' => 'migration',
-    'default_database' => 'general',
-    'general' => [
-      'adapter' => 'mysql',
-      'host' => '%%PHINX_DB_HOST%%',
-      'name' => '%%PHINX_DB_NAME%%',
-      'user' => '%%PHINX_DB_USER%%',
-      'pass' => '%%PHINX_DB_PASS%%',
-      'port' => '%%PHINX_DB_PORT%%',
-      'charset' => '%%PHINX_DB_CHARSET%%',
+
+    /**
+     *
+     * Root
+     *
+     */
+    define ('_ROOT', dirname (__DIR__));
+
+
+    /**
+     *
+     * Vendors
+     *
+     */
+    require_once _ROOT . '/vendor/autoload.php';
+
+
+    /**
+     *
+     * Environments and Defines
+     *
+     */
+    if (! file_exists (_ROOT . '/.env'))
+      throw new \Exception ('Environment file not exists, create one you own from file `.env.example`.');
+
+    $dotenv = new Dotenv\Loader (_ROOT . '/.env');
+    $dotenv->parse ()->toEnv ();
+  }
+
+
+  return [
+
+    'paths' => [
+      'migrations' => [
+        '%%PHINX_CONFIG_DIR%%/../database/migrations',
+      ],
+      'seeds' => [
+        '%%PHINX_CONFIG_DIR%%/../database/seeds',
+      ],
+    ],
+
+    'environments' => [
+      'default_migration_table' => 'migration',
+      'default_database' => 'general',
+      'general' => [
+        'adapter' => 'mysql',
+        'host' => $_ENV['DB_HOST'],
+        'name' => $_ENV['DB_NAME'],
+        'user' => $_ENV['DB_USER'],
+        'pass' => $_ENV['DB_PASS'],
+        'port' => $_ENV['DB_PORT'],
+        'charset' => $_ENV['DB_CHARSET'],
+        'collation' => $_ENV['DB_COLLATION'],
+      ]
     ]
-  ]
-];
+  ];
