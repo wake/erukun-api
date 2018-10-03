@@ -15,6 +15,6 @@
    */
   $app->get ('/', function (Request $request) use ($app) {
 
-    return '<h1>Plane API</h1>';
+    return '<h1>Erukun API Server</h1>';
 
   })->bind ('home');
