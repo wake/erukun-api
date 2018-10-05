@@ -77,7 +77,7 @@
 
     return $app['json-success'] (200, $app['userToLine'] ($user));
 
-  })->bind ('POST:line/user');
+  })->bind ('line/user/create');
 
 
   /**
@@ -90,7 +90,7 @@
     // Receive JSON data
     $post = json_decode (file_get_contents ('php://input'), true);
 
-    // Check if team already exist
+    // Check if user already exist
     $user = Model::Factory ('User')
       ->where ('line_id', $uid)
       ->find_one ();
@@ -108,4 +108,56 @@
 
     return $app['json-success'] (200, $app['userToLine'] ($user));
 
-  })->bind ('PUT:line/user');
+  })->bind ('line/user/update');
+
+
+  /**
+   *
+   * Delete Line user
+   *
+   */
+  $app->delete ('/line/user/{uid}', function (Request $request, $uid) use ($app) {
+
+    // Receive JSON data
+    $post = json_decode (file_get_contents ('php://input'), true);
+
+    // Check if user already exist
+    $user = Model::Factory ('User')
+      ->where ('line_id', $uid)
+      ->find_one ();
+
+    if (! $user)
+      return $app['json-error'] (400, 'User not exists');
+
+    // Delete all issues opened by this user
+    $issues = Model::Factory ('Issue')
+      ->where ('opener_id', $user->id)
+      ->find_many ();
+
+    foreach ($issues as $issue)
+      $issue->delete ();
+
+    // Clear all issues assigned to this user
+    $issues = Model::Factory ('Issue')
+      ->where ('assignee_id', $user->id)
+      ->find_many ();
+
+    foreach ($issues as $issue) {
+      $issue->assignee_id = null;
+      $issue->delete ();
+    }
+
+    // Remove all relation to teams
+    $rels = Model::Factory ('TeamUser')
+      ->where ('user_id', $user->id)
+      ->find_many ();
+
+    foreach ($rels as $rel)
+      $rel->delete ();
+
+    // Delete user
+    $user->delete ();
+
+    return $app['json-success'] (200, null);
+
+  })->bind ('line/user/delete');

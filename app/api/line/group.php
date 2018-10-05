@@ -109,3 +109,45 @@
     return $app['json-success'] (200, $app['teamToLine'] ($team));
 
   })->bind ('line/group/update');
+
+
+  /**
+   *
+   * Delete Line group
+   *
+   */
+  $app->delete ('/line/group/{gid}', function (Request $request, $gid) use ($app) {
+
+    // Receive JSON data
+    $post = json_decode (file_get_contents ('php://input'), true);
+
+    // Check if group already exist
+    $team = Model::Factory ('Team')
+      ->where ('line_group_id', $gid)
+      ->find_one ();
+
+    if (! $team)
+      return $app['json-error'] (400, 'Group not exists');
+
+    // Delete all issues in this team
+    $issues = Model::Factory ('Issue')
+      ->where ('team_id', $team->id)
+      ->find_many ();
+
+    foreach ($issues as $issue)
+      $issue->delete ();
+
+    // Remove all user relation of this team
+    $rels = Model::Factory ('TeamUser')
+      ->where ('team_id', $team->id)
+      ->find_many ();
+
+    foreach ($rels as $rel)
+      $rel->delete ();
+
+    // Delete team
+    $team->delete ();
+
+    return $app['json-success'] (200, null);
+
+  })->bind ('line/group/delete');

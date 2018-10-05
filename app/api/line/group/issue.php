@@ -281,11 +281,38 @@
     $issue->status = _ISSUE_STATUS_UNCHECK;
     $issue->save ();
 
-    $resp = [
-      'state' => ['code' => 1, 'message' => ''],
-      'result' => $app['issueToLine'] ($issue)
-    ];
-
     return $app['json-success'] (200, $app['issueToLine'] ($issue));
 
   })->bind ('line/group/issue/uncheck');
+
+
+  /**
+   *
+   * Delete Line group issue
+   *
+   */
+  $app->delete ('/line/group/{gid}/issue/{iid}', function (Request $request, $gid, $iid) use ($app) {
+
+    // Check if team exists
+    $team = Model::Factory ('Team')
+      ->where_not_null ('line_group_id')
+      ->where ('line_group_id', $gid)
+      ->find_one ();
+
+    if (! $team)
+      return $app['json-error'] (400, 'Group not exists');
+
+    // Check if issue exists
+    $issue = Model::Factory ('Issue')
+      ->where ('id', $iid)
+      ->where ('team_id', $team->id)
+      ->find_one ();
+
+    if (! $issue)
+      return $app['json-error'] (400, 'Issue not exists');
+
+    $issue->delete ();
+
+    return $app['json-success'] (200, null);
+
+  })->bind ('line/group/issue/delete');

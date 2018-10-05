@@ -185,3 +185,67 @@
     return $app['json-success'] (200, $app['userToLine'] ($user));
 
   })->bind ('line/group/user/update');
+
+
+  /**
+   *
+   * Delete Line group user
+   *
+   */
+  $app->delete ('/line/group/{gid}/user/{uid}', function (Request $request, $gid, $uid) use ($app) {
+
+    // Check if team exists
+    $team = Model::Factory ('Team')
+      ->where ('line_group_id', $gid)
+      ->where_not_null ('line_group_id')
+      ->find_one ();
+
+    if (! $team)
+      return $app['json-error'] (400, 'Group not exists');
+
+    $user = Model::Factory ('User')
+      ->where ('line_id', $uid)
+      ->find_one ();
+
+    if (! $user)
+      return $app['json-error'] (400, 'User not exists');
+
+    $rel = Model::Factory ('TeamUser')
+      ->where ('team_id', $team->id)
+      ->where ('user_id', $user->id)
+      ->find_one ();
+
+    if (! $rel)
+      return $app['json-error'] (400, 'User not exists');
+
+    // Delete all issues opened by this user
+    $issues = Model::Factory ('Issue')
+      ->where ('team_id', $team->id)
+      ->where ('opener_id', $user->id)
+      ->find_many ();
+
+    foreach ($issues as $issue)
+      $issue->delete ();
+
+    // Clear all issues assigned to this user
+    $issues = Model::Factory ('Issue')
+      ->where ('team_id', $team->id)
+      ->where ('assignee_id', $user->id)
+      ->find_many ();
+
+    foreach ($issues as $issue) {
+      $issue->assignee_id = null;
+      $issue->delete ();
+    }
+
+    // Remove all relation to teams
+    $rels = Model::Factory ('TeamUser')
+      ->where ('user_id', $user->id)
+      ->find_many ();
+
+    foreach ($rels as $rel)
+      $rel->delete ();
+
+    return $app['json-success'] (200, null);
+
+  })->bind ('line/group/user/delete');
