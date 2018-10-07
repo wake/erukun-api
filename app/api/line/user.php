@@ -108,8 +108,8 @@
       return $app['json-error'] (400, 'Invalid input');
 
     // Update user
-    $user->line_nick = array_key_exists ('userName', $post) ? $post['userName'] : $issue->line_nick;
-    $user->line_avatar = array_key_exists ('userAvatar', $post) ? $post['userAvatar'] : $issue->line_avatar;
+    $user->line_nick = array_key_exists ('userName', $post) ? $post['userName'] : $user->line_nick;
+    $user->line_avatar = array_key_exists ('userAvatar', $post) ? $post['userAvatar'] : $user->line_avatar;
     $user->save ();
 
     // Get user
