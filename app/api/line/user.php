@@ -31,6 +31,7 @@
    */
   $app->get ('/line/user/{uid}', function (Request $request, $uid) use ($app) {
 
+    // Check if user exists
     $user = Model::Factory ('User')
       ->where ('line_id', $uid)
       ->find_one ();
@@ -52,6 +53,10 @@
 
     // Receive JSON data
     $post = json_decode (file_get_contents ('php://input'), true);
+
+    // Invalid input
+    if (! is_array ($post))
+      return $app['json-error'] (400, 'Invalid input');
 
     // Invalid userId
     if (! isset ($post['userId']) || $post['userId'] == '')
@@ -87,10 +92,7 @@
    */
   $app->put ('/line/user/{uid}', function (Request $request, $uid) use ($app) {
 
-    // Receive JSON data
-    $post = json_decode (file_get_contents ('php://input'), true);
-
-    // Check if user already exist
+    // Check if user exist
     $user = Model::Factory ('User')
       ->where ('line_id', $uid)
       ->find_one ();
@@ -98,12 +100,19 @@
     if (! $user)
       return $app['json-error'] (400, 'User not exists');
 
-    // Create user
-    $user->line_nick = isset ($post['userName']) ? $post['userName'] : null;
-    $user->line_avatar = isset ($post['userAvatar']) ? $post['userAvatar'] : null;;
+    // Receive JSON data
+    $post = json_decode (file_get_contents ('php://input'), true);
+
+    // Invalid input
+    if (! is_array ($post))
+      return $app['json-error'] (400, 'Invalid input');
+
+    // Update user
+    $user->line_nick = array_key_exists ('userName', $post) ? $post['userName'] : $issue->line_nick;
+    $user->line_avatar = array_key_exists ('userAvatar', $post) ? $post['userAvatar'] : $issue->line_avatar;
     $user->save ();
 
-    // Get created user
+    // Get user
     $user = Model::Factory ('User')->find_one ($user->id);
 
     return $app['json-success'] (200, $app['userToLine'] ($user));
@@ -118,10 +127,7 @@
    */
   $app->delete ('/line/user/{uid}', function (Request $request, $uid) use ($app) {
 
-    // Receive JSON data
-    $post = json_decode (file_get_contents ('php://input'), true);
-
-    // Check if user already exist
+    // Check if user exist
     $user = Model::Factory ('User')
       ->where ('line_id', $uid)
       ->find_one ();
