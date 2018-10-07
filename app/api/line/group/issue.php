@@ -210,7 +210,7 @@
       return $app['json-error'] (400, 'Issue `title` can\'t be empty');
 
     $issue->title = isset ($post['title']) ? $post['title'] : $issue->title;
-    $issue->desc = (isset ($post['desc']) || is_null ($post['desc'])) ? $post['desc'] : $issue->desc;
+    $issue->desc = isset ($post['desc']) ? $post['desc'] : $issue->desc;
     $issue->status = (isset ($post['status']) && in_array ($post['status'], [_ISSUE_STATUS_UNCHECK, _ISSUE_STATUS_CHECKED])) ? $post['status'] : $issue->status;
     $issue->duedate = (isset ($post['duedate']) || is_null ($post['duedate'])) ? $post['duedate'] : $issue->duedate;
     $issue->save ();
