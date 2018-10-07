@@ -98,10 +98,10 @@
     if (! is_array ($post))
       return $app['json-error'] (400, 'Invalid input');
 
-    if (isset ($post['title'])) {
+    if (array_key_exists ('title', $post)) {
 
-      // Issue
-      if ($post['title'] == '')
+      // Issue title
+      if (is_null ($post['title']) || $post['title'] == '')
         return $app['json-error'] (400, 'Issue title can\'t be empty');
 
       $issue->title = $post['title'];
