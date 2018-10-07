@@ -15,18 +15,17 @@
    */
   $app->get ('/line/group/{gid}/users', function (Request $request, $gid) use ($app) {
 
+    // Check if group exists
     $team = Model::Factory ('Team')
       ->where ('line_group_id', $gid)
       ->where_not_null ('line_group_id')
-      ->find_array ();
+      ->find_one ();
 
-    if (count ($team) <= 0)
+    if (! $team)
       return $app['json-error'] (400, 'Group not exists');
 
-    $team = $team[0];
-
     $rels = Model::Factory ('TeamUser')
-      ->where ('team_id', $team['id'])
+      ->where ('team_id', $team->id)
       ->find_array ();
 
     $uids = dig ($rels, 'user_id');
@@ -48,30 +47,29 @@
    */
   $app->get ('/line/group/{gid}/user/{uid}', function (Request $request, $gid, $uid) use ($app) {
 
+    // Check if group exists
     $team = Model::Factory ('Team')
       ->where ('line_group_id', $gid)
       ->where_not_null ('line_group_id')
-      ->find_array ();
+      ->find_one ();
 
-    if (count ($team) <= 0)
+    if (! $team)
       return $app['json-error'] (400, 'Group not exists');
 
+    // Check if user exists
     $user = Model::Factory ('User')
       ->where ('line_id', $uid)
-      ->find_array ();
+      ->find_one ();
 
-    if (count ($user) <= 0)
+    if (! $user)
       return $app['json-error'] (400, 'User not exists');
 
-    $team = $team[0];
-    $user = $user[0];
+    $rel = Model::Factory ('TeamUser')
+      ->where ('team_id', $team->id)
+      ->where ('user_id', $user->id)
+      ->find_one ();
 
-    $rels = Model::Factory ('TeamUser')
-      ->where ('team_id', $team['id'])
-      ->where ('user_id', $user['id'])
-      ->find_array ();
-
-    if (count ($rels) <= 0)
+    if (! $rel)
       return $app['json-error'] (400, 'User not exists');
 
     return $app['json-success'] (200, $app['userToLine'] ($user));
@@ -98,6 +96,10 @@
     // Receive JSON data
     $post = json_decode (file_get_contents ('php://input'), true);
 
+    // Invalid input
+    if (! is_array ($post))
+      return $app['json-error'] (400, 'Invalid input');
+
     // Invalid userId
     if (! isset ($post['userId']) || $post['userId'] == '')
       return $app['json-error'] (400, 'Invalid user id');
@@ -117,12 +119,8 @@
     }
 
     // 做新聯繫的同時會更新 Name + Avatar
-    if (isset ($post['userName']) && $post['userName'] != '')
-      $user->line_nick = $post['userName'];
-
-    if (isset ($post['userAvatar']) && $post['userAvatar'] != '')
-      $user->line_avatar = $post['userAvatar'];
-
+    $user->line_nick = array_key_exists ('userName', $post) ? $post['userName'] : $user->line_nick;
+    $user->line_avatar = array_key_exists ('userAvatar', $post) ? $post['userAvatar'] : $user->line_avatar;
     $user->save ();
 
     // Check if team-user relation exists
@@ -133,7 +131,7 @@
 
     if (! $rel) {
       $rel = Model::Factory ('TeamUser')->create ();
-      $rel->type    = _TEAM_USER_TYPE_LINE;
+      $rel->type = _TEAM_USER_TYPE_LINE;
       $rel->team_id = $team->id;
       $rel->user_id = $user->id;
       $rel->save ();
@@ -178,8 +176,12 @@
     // Receive JSON data
     $post = json_decode (file_get_contents ('php://input'), true);
 
-    $user->line_nick = isset ($post['userName']) ? $post['userName'] : null;
-    $user->line_avatar = isset ($post['userAvatar']) ? $post['userAvatar'] : null;;
+    // Invalid input
+    if (! is_array ($post))
+      return $app['json-error'] (400, 'Invalid input');
+
+    $user->line_nick = array_key_exists ('userName', $post) ? $post['userName'] : $user->line_nick;
+    $user->line_avatar = array_key_exists ('userAvatar', $post) ? $post['userAvatar'] : $user->line_avatar;
     $user->save ();
 
     return $app['json-success'] (200, $app['userToLine'] ($user));
@@ -203,6 +205,7 @@
     if (! $team)
       return $app['json-error'] (400, 'Group not exists');
 
+    // Check if user exists
     $user = Model::Factory ('User')
       ->where ('line_id', $uid)
       ->find_one ();
@@ -210,6 +213,7 @@
     if (! $user)
       return $app['json-error'] (400, 'User not exists');
 
+    // Check if realtion exists
     $rel = Model::Factory ('TeamUser')
       ->where ('team_id', $team->id)
       ->where ('user_id', $user->id)
@@ -218,7 +222,7 @@
     if (! $rel)
       return $app['json-error'] (400, 'User not exists');
 
-    // Delete all issues opened by this user
+    // Delete all issues opened by the user
     $issues = Model::Factory ('Issue')
       ->where ('team_id', $team->id)
       ->where ('opener_id', $user->id)
@@ -227,7 +231,7 @@
     foreach ($issues as $issue)
       $issue->delete ();
 
-    // Clear all issues assigned to this user
+    // Clear all issues assigned to the user
     $issues = Model::Factory ('Issue')
       ->where ('team_id', $team->id)
       ->where ('assignee_id', $user->id)
@@ -238,7 +242,7 @@
       $issue->delete ();
     }
 
-    // Remove all relation to teams
+    // Remove all relationship with team
     $rels = Model::Factory ('TeamUser')
       ->where ('user_id', $user->id)
       ->find_many ();
