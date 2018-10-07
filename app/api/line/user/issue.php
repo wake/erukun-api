@@ -150,7 +150,7 @@
 
     return $app['json-success'] (200, $app['issueToLine'] ($issue));
 
-  })->bind ('line/group/issue/check');
+  })->bind ('line/user/issue/check');
 
 
   /**
@@ -184,7 +184,7 @@
 
     return $app['json-success'] (200, $app['issueToLine'] ($issue));
 
-  })->bind ('line/group/issue/uncheck');
+  })->bind ('line/user/issue/uncheck');
 
 
   /**
@@ -217,4 +217,4 @@
 
     return $app['json-success'] (200, null);
 
-  })->bind ('line/group/issue/delete');
+  })->bind ('line/user/issue/delete');
