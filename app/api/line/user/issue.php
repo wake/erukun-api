@@ -102,7 +102,7 @@
 
       // Issue
       if ($post['title'] == '')
-        return $app['json-error'] (400, 'Issue can\'t be empty');
+        return $app['json-error'] (400, 'Issue title can\'t be empty');
 
       $issue->title = $post['title'];
     }
