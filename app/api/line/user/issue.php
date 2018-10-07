@@ -15,6 +15,7 @@
    */
   $app->get ('/line/user/{uid}/issues', function (Request $request, $uid) use ($app) {
 
+    // Check if user exists
     $user = Model::Factory ('User')
       ->where ('line_id', $uid)
       ->find_one ();
