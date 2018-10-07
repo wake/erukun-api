@@ -31,6 +31,7 @@
    */
   $app->get ('/line/group/{gid}', function (Request $request, $gid) use ($app) {
 
+    // Check if team exist
     $team = Model::Factory ('Team')
       ->where ('line_group_id', $gid)
       ->find_one ();
@@ -53,17 +54,21 @@
     // Receive JSON data
     $post = json_decode (file_get_contents ('php://input'), true);
 
+    // Invalid input
+    if (! is_array ($post))
+      return $app['json-error'] (400, 'Invalid input');
+
     // Invalid groupId
     if (! isset ($post['groupId']) || $post['groupId'] == '')
       return $app['json-error'] (400, 'Invalid group id');
 
-    // Check if team already exist
+    // Check if team exist
     $team = Model::Factory ('Team')
       ->where ('line_group_id', $post['groupId'])
-      ->find_array ();
+      ->find_one ();
 
-    if (count ($team) > 0)
-      return $app['json-success'] (200, $app['teamToLine'] ($team[0]));
+    if ($team)
+      return $app['json-success'] (200, $app['teamToLine'] ($team));
 
     // Create team
     $team = Model::Factory ('Team')->create ();
@@ -72,7 +77,7 @@
     $team->line_group_desc = isset ($post['groupDesc']) ? $post['groupDesc'] : null;
     $team->save ();
 
-    // Re-get created team
+    // Reload created team
     $team = Model::Factory ('Team')->find_one ($team->id);
 
     return $app['json-success'] (200, $app['teamToLine'] ($team));
@@ -87,9 +92,6 @@
    */
   $app->put ('/line/group/{gid}', function (Request $request, $gid) use ($app) {
 
-    // Receive JSON data
-    $post = json_decode (file_get_contents ('php://input'), true);
-
     // Check if team already exist
     $team = Model::Factory ('Team')
       ->where ('line_group_id', $gid)
@@ -98,12 +100,19 @@
     if (! $team)
       return $app['json-error'] (400, 'Group not exists');
 
-    // Create team
-    $team->line_group_name = isset ($post['groupName']) ? $post['groupName'] : null;
-    $team->line_group_desc = isset ($post['groupDesc']) ? $post['groupDesc'] : null;
+    // Receive JSON data
+    $post = json_decode (file_get_contents ('php://input'), true);
+
+    // Invalid input
+    if (! is_array ($post))
+      return $app['json-error'] (400, 'Invalid input');
+
+    // Update team
+    $team->line_group_name = array_key_exists ('groupName', $post) ? $post['groupName'] : $team->line_group_name;
+    $team->line_group_desc = array_key_exists ('groupDesc', $post) ? $post['groupDesc'] : $team->line_group_desc;
     $team->save ();
 
-    // Re-get created team
+    // Reload created team
     $team = Model::Factory ('Team')->find_one ($team->id);
 
     return $app['json-success'] (200, $app['teamToLine'] ($team));
@@ -118,10 +127,7 @@
    */
   $app->delete ('/line/group/{gid}', function (Request $request, $gid) use ($app) {
 
-    // Receive JSON data
-    $post = json_decode (file_get_contents ('php://input'), true);
-
-    // Check if group already exist
+    // Check if group exist
     $team = Model::Factory ('Team')
       ->where ('line_group_id', $gid)
       ->find_one ();
@@ -129,7 +135,7 @@
     if (! $team)
       return $app['json-error'] (400, 'Group not exists');
 
-    // Delete all issues in this team
+    // Delete all issues in the team
     $issues = Model::Factory ('Issue')
       ->where ('team_id', $team->id)
       ->find_many ();
@@ -137,7 +143,7 @@
     foreach ($issues as $issue)
       $issue->delete ();
 
-    // Remove all user relation of this team
+    // Remove all user relation of the team
     $rels = Model::Factory ('TeamUser')
       ->where ('team_id', $team->id)
       ->find_many ();
