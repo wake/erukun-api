@@ -15,6 +15,7 @@
    */
   $app->get ('/line/group/{gid}/issues', function (Request $request, $gid) use ($app) {
 
+    // Check if team exist
     $team = Model::Factory ('Team')
       ->where ('line_group_id', $gid)
       ->where_not_null ('line_group_id')
@@ -39,6 +40,7 @@
    */
   $app->get ('/line/group/{gid}/issue/{iid}', function (Request $request, $gid, $iid) use ($app) {
 
+    // Check if team exist
     $team = Model::Factory ('Team')
       ->where ('line_group_id', $gid)
       ->where_not_null ('line_group_id')
@@ -47,7 +49,7 @@
     if (! $team)
       return $app['json-error'] (400, 'Group not exists');
 
-    // Check if team exists
+    // Check if issue exists
     $issue = Model::Factory ('Issue')
       ->where ('id', $iid)
       ->where ('team_id', $team->id)
@@ -79,6 +81,10 @@
 
     // Receive JSON data
     $post = json_decode (file_get_contents ('php://input'), true);
+
+    // Invalid input
+    if (! is_array ($post))
+      return $app['json-error'] (400, 'Invalid input');
 
     // Invalid userId
     if (! isset ($post['openerId']) || $post['openerId'] == '')
@@ -163,7 +169,7 @@
     if (! $team)
       return $app['json-error'] (400, 'Group not exists');
 
-    // Check if team exists
+    // Check if issue exists
     $issue = Model::Factory ('Issue')
       ->where ('id', $iid)
       ->where ('team_id', $team->id)
@@ -202,17 +208,24 @@
     }
 
     // Null to remove user
-    else if (is_null ($post['assigneeId']))
+    else if (array_key_exists ('assigneeId', $post) && is_null ($post['assigneeId']))
       $issue->assignee_id = null;
 
-    // Issue
+    if (array_key_exists ('title', $post)) {
+
+      // Issue title
+      if (is_null ($post['title']) || $post['title'] == '')
+        return $app['json-error'] (400, 'Issue title can\'t be empty');
+
+      $issue->title = $post['title'];
+    }
+
     if (isset ($post['title']) && $post['title'] == '')
       return $app['json-error'] (400, 'Issue `title` can\'t be empty');
 
-    $issue->title = isset ($post['title']) ? $post['title'] : $issue->title;
-    $issue->desc = isset ($post['desc']) ? $post['desc'] : $issue->desc;
+    $issue->desc = array_key_exists ('desc', $post) ? $post['desc'] : $issue->desc;
+    $issue->duedate = array_key_exists ('duedate', $post) ? $post['duedate'] : $issue->duedate;
     $issue->status = (isset ($post['status']) && in_array ($post['status'], [_ISSUE_STATUS_UNCHECK, _ISSUE_STATUS_CHECKED])) ? $post['status'] : $issue->status;
-    $issue->duedate = (isset ($post['duedate']) || is_null ($post['duedate'])) ? $post['duedate'] : $issue->duedate;
     $issue->save ();
 
     $issue = Model::Factory ('Issue')->find_one ($issue->id);
