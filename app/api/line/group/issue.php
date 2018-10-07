@@ -134,7 +134,8 @@
     $issue->team_id = $team->id;
     $issue->opener_id = $opener->id;
     $issue->assignee_id = $assignee ? $assignee->id : null;
-    $issue->title   = $post['title'];
+    $issue->title = $post['title'];
+    $issue->desc = isset ($post['desc']) ? $post['desc'] : null;
     $issue->status  = _ISSUE_STATUS_UNCHECK;
     $issue->duedate = isset ($post['duedate']) ? $post['duedate'] : null;
     $issue->save ();
@@ -208,8 +209,9 @@
     if (isset ($post['title']) && $post['title'] == '')
       return $app['json-error'] (400, 'Issue `title` can\'t be empty');
 
-    $issue->title   = isset ($post['title']) ? $post['title'] : $issue->title;
-    $issue->status  = (isset ($post['status']) && in_array ($post['status'], [_ISSUE_STATUS_UNCHECK, _ISSUE_STATUS_CHECKED])) ? $post['status'] : $issue->status;
+    $issue->title = isset ($post['title']) ? $post['title'] : $issue->title;
+    $issue->desc = (isset ($post['desc']) || is_null ($post['desc'])) ? $post['desc'] : $issue->desc;
+    $issue->status = (isset ($post['status']) && in_array ($post['status'], [_ISSUE_STATUS_UNCHECK, _ISSUE_STATUS_CHECKED])) ? $post['status'] : $issue->status;
     $issue->duedate = (isset ($post['duedate']) || is_null ($post['duedate'])) ? $post['duedate'] : $issue->duedate;
     $issue->save ();
 
