@@ -65,10 +65,10 @@
     // Check if team already exist
     $user = Model::Factory ('User')
       ->where ('line_id', $post['userId'])
-      ->find_array ();
+      ->find_one ();
 
-    if (count ($user) > 0)
-      return $app['json-success'] (200, $app['userToLine'] ($user[0]));
+    if ($user)
+      return $app['json-success'] (200, $app['userToLine'] ($user));
 
     // Create user
     $user = Model::Factory ('User')->create ();
