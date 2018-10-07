@@ -45,6 +45,7 @@
     $data['assignee'] = $assignee ? $app['userToLine'] ($assignee) : null;
     $data['opener'] = $opener ? $app['userToLine'] ($opener) : null;
     $data['title'] = $issue->title;
+    $data['desc'] = $issue->desc;
     $data['status'] = $issue->status;
     $data['duedate'] = $issue->duedate;
     $data['createdate'] = $issue->createdate;
