@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="robots" content="noindex">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Erukun API status</title>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <style>
+    .wrapper { padding: 0 15px; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <h2>Erukun API status</h2>
+    <ul>
+      <li>API Host: <span id="host">...</span></li>
+      <li>GET testing: <span id="get">...</span></li>
+      <li>POST testing: <span id="post">...</span></li>
+      <li>PUT testing: <span id="put">...</span></li>
+      <li>DELETE testing: <span id="delete">...</span></li>
+    </ul>
+  </div>
+  <script>
+
+  var host = '{{ env.API_REMOTE }}';
+
+  document.getElementById ('host').innerHTML = host;
+
+  ['get', 'post', 'put', 'delete'].forEach (function (method) {
+    axios[method] (host + '/test')
+      .then (function () { document.getElementById (method).innerHTML = 'success'; })
+      .catch (function () { document.getElementById (method).innerHTML = 'failed'; });
+  });
+
+  </script>
+</body>
+</html>

@@ -22,6 +22,20 @@
 
   /**
    *
+   * API status check
+   *
+   */
+  $app->get ('/status', function (Request $request) use ($app) {
+
+    return $app
+      ->assign ('env', $_ENV)
+      ->render ('api-status.html');
+
+  })->bind ('status');
+
+
+  /**
+   *
    * API error handler
    *
    */
