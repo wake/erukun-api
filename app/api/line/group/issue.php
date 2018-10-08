@@ -184,11 +184,11 @@
     $assignee = null;
 
     // Has userId
-    if (isset ($post['assignId']) && $post['assignId'] != '') {
+    if (isset ($post['assigneeId']) && $post['assigneeId'] != '') {
 
       // Check if user exists
       $assignee = Model::Factory ('User')
-        ->where ('line_id', $post['assignId'])
+        ->where ('line_id', $post['assigneeId'])
         ->where_not_null ('line_id')
         ->find_one ();
 
